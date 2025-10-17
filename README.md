@@ -1,33 +1,29 @@
-🎓 AI-Powered Student Loan Recommendation Engine
-
-This project is an AI-based loan recommendation system designed to help students find the most suitable education loan products. The model takes student-specific details as input and outputs the approval probability for different bank loan products, ranking them from best to least suitable.
+🎓 AI-Powered Student Loan Recommendation Engine (Model Training)
+This repository contains the complete workflow for training an XGBoost-based machine learning model to recommend the best education loan products for students. The model predicts approval probability for a student's profile across multiple bank loan products, ranking them for suitability.
 
 🚀 Features
+Predicts loan approval probability for students from 40+ Indian loan products.
 
-✅ Predicts loan approval probability for students across 40 loan products.
+Student-specific inputs: CGPA, university tier, income, loan amount, collateral, repayment period, etc.
 
-✅ Supports student-specific inputs: CGPA, university tier, income, loan amount, collateral, etc.
+Handles bank-specific rules: max loan amount, collateral conditions, tier restrictions.
 
-✅ Handles bank-specific constraints: max loan amount, collateral rules, Tier-1 college restrictions.
+Ranks loan products by approval probability and returns Top 3 recommendations for any student.
 
-✅ Ranks loan products by approval probability and returns Top 3 recommendations.
+Hybrid dataset built from real Kaggle data plus synthetic features adapted for Indian education loans.
 
-✅ Designed with a hybrid dataset (real Kaggle data + synthetic student features).
-
-✅ Exportable trained ML model (.pkl file) for deployment in APIs or apps.
+Exportable trained XGBoost model (loan_model.pkl) for use in backends or apps.
 
 📊 1. Data Collection
 🔹 Loan Products Dataset
+Curated ~40 education loan products from Indian banks.
+Columns include:
 
-Collected and curated ~40 education loan products from Indian banks.
-
-Columns included:
-
-Bank name & product name
+Bank name/product name
 
 Interest rate
 
-Max loan (Domestic & Abroad)
+Max loan (domestic/abroad)
 
 Repayment period
 
@@ -38,11 +34,8 @@ Collateral required
 Eligibility (e.g., Tier-1 colleges only)
 
 🔹 Student Dataset
-
-Base dataset: Taken from Kaggle Loan Data
- (originally US-based).
-
-Columns available from Kaggle:
+Base: Kaggle Loan Data (originally US-based)
+Columns from Kaggle:
 
 credit_score
 
@@ -51,63 +44,63 @@ person_income
 loan_amnt
 
 previous_loan_defaults_on_file
-
 Adaptations made:
 
-Converted values to Indian ranges (income, loan amount, credit score).
+Converted ranges to Indian context (income, loan amount, credit score)
 
-Removed US-specific attributes (like home_ownership).
+Removed US-specific columns
 
 Synthetic features added:
 
-university_tier → (Tier 1 / Tier 2 / Tier 3, partially correlated with credit score & income).
+university_tier (Tier 1/2/3, correlated with credit score)
 
-cgpa → generated with correlation to tier, with randomness.
+cgpa (linked to tier for realism)
 
-collateral_available → binary, linked with income level.
+collateral_available (binary, linked with income)
 
-repayment_period → randomized between 5–15 years.
+repayment_period (randomized 5–15 years)
 
-👉 Final dataset = Kaggle base (adapted to India) + Synthetic Student Features
+👉 Final dataset
+Kaggle base (adapted for India) + Synthetic student features, paired with each loan product.
 
 ⚙️ 2. Data Preparation
+Merged student dataset with loan product dataset, pairing each student with every loan.
 
-Merged student dataset with loan product dataset so each student is paired with every loan.
+Hard rules for approval probability:
 
-Applied hard rules for approval probability:
+Requested loan > bank's max = probability 0
 
-If requested loan > max bank limit → probability = 0.
+Collateral required but not available = 0
 
-If collateral required but not available → probability = 0.
+Tier not eligible = 0
 
-If tier not eligible for product → probability = 0.
+Soft scoring:
 
-Applied soft scoring:
+Higher CGPA/tier, higher probability
 
-Higher CGPA & tier → higher probability.
+Smaller gap between requested and max loan, higher probability
 
-Lower difference between requested and max loan → higher probability.
-
-Higher credit score → higher probability.
+Higher credit score, higher probability
 
 🤖 3. Model Training
+Target: Approval Probability (between 0 and 1)
 
-Target variable: Approval Probability (0–1).
+Features:
 
-Features used:
+Student: cgpa, university_tier, person_income, loan_amnt, credit_score, previous_loan_defaults_on_file, collateral_available, repayment_period
 
-Student features: cgpa, university_tier, person_income, loan_amnt, credit_score, previous_loan_defaults_on_file, collateral_available, repayment_period.
+Loan: Bank_Name, Product_Name, Interest_Rate, Max_Loan_Domestic, Repayment_Period, etc.
 
-Loan features: Bank_Name, Product_Name, Interest_Rate, Max_Loan_Domestic, Repayment_Period, etc.
+Preprocessing: One-Hot Encoding for categorical columns (Bank_Name, Product_Name, university_tier).
 
-Preprocessing:
+Model: XGBoost Regressor with tuned hyperparameters.
 
-Applied One-Hot Encoding to categorical columns (Bank_Name, Product_Name).
+Output: Trained model saved as loan_model.pkl and ready for deployment.
 
-Model:
+📦 Usage
+Clone the repo and run the notebook to train or update the model (train_model.ipynb or similar).
 
-Random Forest Regressor (sklearn) with tuned hyperparameters.
+Use the exported model in APIs or integrate with app backends for loan recommendations.
 
-Output:
+Easily experiment with new features, data or rules by editing the preprocessing steps.
 
-Trained model saved as loan_model.pkl.
